@@ -4,15 +4,24 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/dialog_stock"
+    <com.udacity.stockhawk.ui.DelayAutoCompleteTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/dialog_stock"
+        android:inputType="textCapSentences"
+        android:imeOptions="flagNoExtractUi|actionSearch"
         android:layout_marginBottom="4dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginTop="16dp"
         android:hint="@string/dialog_hint"
-        android:inputType="textCapCharacters" />
-
+        />
+    <ProgressBar
+        android:id="@+id/pb_loading_indicator"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|right"
+        android:layout_marginRight="@dimen/margin_default"
+        android:visibility="gone"/>
 </LinearLayout>

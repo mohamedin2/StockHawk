@@ -12,10 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.data.Stock;
+import com.udacity.stockhawk.sync.SymbolAutoCompleteAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,7 +29,10 @@ public class AddStockDialog extends DialogFragment {
 
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.dialog_stock)
-    EditText stock;
+    DelayAutoCompleteTextView stock;
+    @BindView(R.id.pb_loading_indicator)
+    ProgressBar progressBar;
+    final int THRESHOLD = 3;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -36,6 +43,17 @@ public class AddStockDialog extends DialogFragment {
         @SuppressLint("InflateParams") View custom = inflater.inflate(R.layout.add_stock_dialog, null);
 
         ButterKnife.bind(this, custom);
+
+        stock.setThreshold(THRESHOLD);
+        stock.setAdapter(new SymbolAutoCompleteAdapter(getActivity())); // 'this' is Activity instance
+        stock.setLoadingIndicator(progressBar);
+        stock.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Stock stockObj = (Stock) adapterView.getItemAtPosition(position);
+                stock.setText(stockObj.getSymbol());
+            }
+        });
 
         stock.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

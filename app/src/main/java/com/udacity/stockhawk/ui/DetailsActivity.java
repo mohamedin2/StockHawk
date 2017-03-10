@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -42,9 +43,19 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        Intent intent = getIntent();
+        String history = intent.getStringExtra(Contract.Quote.COLUMN_HISTORY);
+        String symbol = intent.getStringExtra(Contract.Quote.COLUMN_SYMBOL);
+        final List<String> historyPoints = Arrays.asList(history.split("\n"));
+        Collections.reverse(historyPoints);
+
+        TextView stockName = (TextView) findViewById(R.id.stockName);
+
+        stockName.setText(symbol);
+
         mChart = (LineChart) findViewById(R.id.chart);
-        mChart.setViewPortOffsets(70, 50, 30, 0);
-        mChart.setBackgroundColor(Color.WHITE/*rgb(104, 241, 175)*/);
+        mChart.setViewPortOffsets(120, 180, 0, 0);
+        mChart.setBackgroundColor(Color.WHITE);
 
         // no description text
         mChart.getDescription().setEnabled(false);
@@ -62,16 +73,12 @@ public class DetailsActivity extends AppCompatActivity {
         mChart.setDrawGridBackground(false);
         mChart.setMaxHighlightDistance(300);
 
-        Intent intent = getIntent();
-        String history = intent.getStringExtra(Contract.Quote.COLUMN_HISTORY);
-        final List<String> historyPoints = Arrays.asList(history.split("\n"));
-        Collections.reverse(historyPoints);
-
         XAxis x = mChart.getXAxis();
         x.setDrawGridLines(true);
         x.setEnabled(true);
-        //x.setCenterAxisLabels(true);
-        x.setGranularity(1f); // one week
+        x.setLabelRotationAngle(-90);
+        x.setGranularity(1f);
+        x.setTextSize(12);
         x.setValueFormatter(new IAxisValueFormatter() {
 
             private SimpleDateFormat mFormat = new SimpleDateFormat("MMM yyyy");
@@ -88,13 +95,16 @@ public class DetailsActivity extends AppCompatActivity {
 
 
         YAxis y = mChart.getAxisLeft();
-      //  y.setTypeface(mTfLight);
-        //y.setLabelCount(6, false);
         y.setTextColor(Color.BLACK);
-        //y.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
         y.setDrawGridLines(true);
         y.setAxisLineColor(Color.BLACK);
-
+        y.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return "$" + String.format("%.1f", value);
+            }
+        });
+        y.setTextSize(12);
         mChart.getAxisRight().setEnabled(false);
 
 
@@ -102,9 +112,6 @@ public class DetailsActivity extends AppCompatActivity {
         setData(historyPoints);
 
         mChart.getLegend().setEnabled(false);
-
-        //mChart.animateXY(2000, 2000);
-
         // dont forget to refresh the drawing
         mChart.invalidate();
     }
@@ -130,31 +137,18 @@ public class DetailsActivity extends AppCompatActivity {
             mChart.notifyDataSetChanged();
         } else {
             // create a dataset and give it a type
-            set1 = new LineDataSet(yVals, "DataSet 1");
+            set1 = new LineDataSet(yVals, "Historic Data");
 
-            set1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-            set1.setCubicIntensity(0.2f);
-            //set1.setDrawFilled(true);
             set1.setDrawCircles(false);
             set1.setLineWidth(1.8f);
-            set1.setCircleRadius(4f);
-            set1.setCircleColor(Color.WHITE);
             set1.setHighLightColor(Color.rgb(244, 117, 117));
-            set1.setColor(Color.WHITE);
+            set1.setColor(Color.BLUE);
             set1.setFillColor(Color.BLUE);
             set1.setDrawFilled(true);
             set1.setFillAlpha(100);
-            set1.setDrawHorizontalHighlightIndicator(false);
-            set1.setFillFormatter(new IFillFormatter() {
-                @Override
-                public float getFillLinePosition(ILineDataSet dataSet, LineDataProvider dataProvider) {
-                    return -10;
-                }
-            });
 
             // create a data object with the datasets
             LineData data = new LineData(set1);
-           // data.setValueTypeface(mTfLight);
             data.setValueTextSize(9f);
             data.setDrawValues(false);
 

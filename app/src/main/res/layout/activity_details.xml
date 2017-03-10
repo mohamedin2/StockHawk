@@ -10,9 +10,18 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.udacity.stockhawk.ui.DetailsActivity"
     android:background="@color/material_blue_500">
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/stockName"
+        android:minHeight="30dp" />
+
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/background_light" />
+        android:background="@android:color/background_light"
+        android:layout_marginTop="30dp" />
 </RelativeLayout>

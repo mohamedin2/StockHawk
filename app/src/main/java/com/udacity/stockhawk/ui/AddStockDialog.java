@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -13,7 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -32,7 +33,10 @@ public class AddStockDialog extends DialogFragment {
     DelayAutoCompleteTextView stock;
     @BindView(R.id.pb_loading_indicator)
     ProgressBar progressBar;
-    final int THRESHOLD = 3;
+    final int THRESHOLD = 2;
+
+    private AlertDialog mDialog;
+    private boolean isValidSymbol = false;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -45,7 +49,8 @@ public class AddStockDialog extends DialogFragment {
         ButterKnife.bind(this, custom);
 
         stock.setThreshold(THRESHOLD);
-        stock.setAdapter(new SymbolAutoCompleteAdapter(getActivity())); // 'this' is Activity instance
+        final SymbolAutoCompleteAdapter adapter = new SymbolAutoCompleteAdapter(getActivity());
+        stock.setAdapter(adapter);
         stock.setLoadingIndicator(progressBar);
         stock.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -55,10 +60,35 @@ public class AddStockDialog extends DialogFragment {
             }
         });
 
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                String str = stock.getText().toString();
+                for(int i = 0; i < adapter.getCount(); i++) {
+                    Stock stock = adapter.getItem(i);
+                    if(str.equalsIgnoreCase(stock.getSymbol())) { //symbol found
+                        isValidSymbol = true;
+                        mDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        return;
+                    }
+                }
+                isValidSymbol = false;
+                mDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            }
+
+            @Override
+            public void onInvalidated() {
+                super.onInvalidated();
+                isValidSymbol = false;
+                mDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            }
+        });
         stock.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                addStock();
+                if (isValidSymbol)
+                    addStock();
                 return true;
             }
         });
@@ -73,14 +103,14 @@ public class AddStockDialog extends DialogFragment {
                 });
         builder.setNegativeButton(getString(R.string.dialog_cancel), null);
 
-        Dialog dialog = builder.create();
+        mDialog = builder.create();
 
-        Window window = dialog.getWindow();
+        Window window = mDialog.getWindow();
         if (window != null) {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
 
-        return dialog;
+        return mDialog;
     }
 
     private void addStock() {

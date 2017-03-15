@@ -73,6 +73,9 @@ public final class QuoteSyncJob {
 
 
                 Stock stock = quotes.get(symbol);
+                //This is a last guard in case all guards failed to prevent invalid input or there was an existing invalid input
+                if (stock.getName() == null) continue;
+
                 StockQuote quote = stock.getQuote();
 
                 float price = quote.getPrice().floatValue();

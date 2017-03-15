@@ -57,6 +57,8 @@ public class AddStockDialog extends DialogFragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Stock stockObj = (Stock) adapterView.getItemAtPosition(position);
                 stock.setText(stockObj.getSymbol());
+                isValidSymbol = true;
+                mDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
             }
         });
 
